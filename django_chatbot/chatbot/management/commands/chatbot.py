@@ -1,14 +1,12 @@
 from django.core.management.base import BaseCommand
 from chatbot.models import Users,Chats,Logs
-
-import os
-import re
+import os ,re , uuid
 from openai import OpenAI
 from dotenv import load_dotenv
-import uuid
 
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
+goodbyes = ["bye" , "goodbye" , "quit" ,"exit"]
 
 
 class Command(BaseCommand):
@@ -30,85 +28,148 @@ class Command(BaseCommand):
         else:
             return False
 
-    def add_user(self,phone,name,email,physical):
+    def add_user_to_db(self,phone,name,email,physical):
         row = Users.objects.create(
             phone = phone,
             name = name,
             email = email,
             physical_address = physical,
         )
-        return row.id
+        return row
 
 
-    def handle(self, *args, **kwargs):
-        # Logic to execute when the command is called
-        client = OpenAI()
+    def customer_information_validation(self,response):
         phone = None
         name = None
         email = None
         physical_address = hex(uuid.getnode())
+        user = None
+        customer_information_valid = False
 
-        customer_information_completed = False
+        if ("Phone Number:" and "Email:" and "Name:" in response):
+            phone = response.partition("Phone Number:")[2].split('\n')[0]
+            email = response.partition("Email:")[2].split('\n')[0]
+            name = response.partition("Name:")[2].split('\n')[0]
+            customer_information_valid = True
+            
+
+            if not self.validate_phone_number(phone):
+                print("")
+                customer_information_valid = False
+                print(f"phone is Invalid: {phone}")
+
+            if not self.validate_email(email):
+                customer_information_valid = False
+                print(f"Mail is Invalid {email}")
+
+            if customer_information_valid:
+                user = self.add_user_to_db(phone,name,email,physical_address)
+                # print(f'User Id = {user.id}')
+        
+        return user 
+
+    def add_to_logs(self,message,response,user,chat):
+        log = Logs.objects.create(
+                message = message,
+                response = response,
+                user_id = user,
+                chat_id = chat
+        )
+        return log
+    
+    def handle(self, *args, **kwargs):
+        # First Get The Customer Information To Start The Chat
+        client = OpenAI()
+
         chat_log = [ 
             {'role': 'system', 'content' : 'you are given the customers information and they are 1) phone_number 2) name 3) email and wont continue unless you get all of them and print them'}
             ]
-        print("\nHello, Can you give me your information: phone_number , name , email\n")
+        print("\nHello, Can you give me your information: Phone Number , Name , Email")
         while True:
+            print("\n")
             user_message = input("You: ")
-            if user_message == "quit":
-                # Create Summary and push it to chat db
+            print("\n")
+            chat_log.append({"role": "user","content":user_message})
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=chat_log,
+                temperature = 0.5,
+                max_tokens = 1024
+            )
+            bot_response = response.choices[0].message.content
+
+            user = self.customer_information_validation(bot_response)
+            self.stdout.write(self.style.SUCCESS(f'AI: {bot_response}')  )
+            chat_log.append({"role":"assistant","content":bot_response})
+
+            if user is not None:
                 break
+
+        # ===============================================================#
+        # Second Start The Complaint Chat Bot And Summarize It In The End
+        chat_log = [ 
+            {
+            'role': 'system',
+            'content' : 'You will be provided with the customer complaint, your task is to listen and try to solve his problem'
+            }
+        ]
+        chat_instance =  Chats()
+        chat_instance.user_id = user
+        chat_instance.active = True
+        chat_instance.save()
+        chat_id = chat_instance.id
+        
+
+        while True:
+            print("\n")
+            user_message = input("You: ")
+            print("\n")
+            # End Of The Conversation And Get The Summary
+            if any(word in user_message.lower() for word in goodbyes):
+
+                chat_log.append( 
+                    {'role': 'system',
+                    'content' : 'Till now you provided with the customer`s problem, your task is to Provide a brief summary of this customer`s problem'
+                    }
+                )
+                response = client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=chat_log,
+                    temperature = 0.7,
+                    max_tokens = 512,
+                    top_p=1
+                )
+                summary = response.choices[0].message.content
+                self.stdout.write(self.style.SUCCESS(f'This Complaint Summary: {summary}') )
+                self.stdout.write(self.style.SUCCESS(f"This Chat ID = {chat_id}") )
+
+                current_chat = Chats.objects.get(id = chat_id)
+                current_chat.summary = summary
+                current_chat.save()
+                break
+
             else:
                 chat_log.append({"role": "user","content":user_message})
 
                 response = client.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=chat_log,
-                    temperature = 0.5,
-                    max_tokens = 1024
+                    temperature = 0.7,
+                    max_tokens = 256,
+                    top_p=1
                 )
 
                 bot_response = response.choices[0].message.content
 
-                if ("Phone Number:" and "Email:" and "Name:" in bot_response):
-                    # print("all data exists")
-                    phone = bot_response.partition("Phone Number:")[2].split('\n')[0]
-                    email = bot_response.partition("Email:")[2].split('\n')[0]
-                    name = bot_response.partition("Name:")[2].split('\n')[0]
-                    customer_information_completed = True
-
-                    if not self.validate_phone_number(phone):
-                        print("")
-                        customer_information_completed = False
-                        print(f"phone is Invalid: {phone}")
-
-                    if not self.validate_email(email):
-                        customer_information_completed = False
-                        print(f"Mail is Invalid {email}")
-
-                    if customer_information_completed:
-                        # print(
-                        # f'phone is {phone}, name is {name}, email is {email} , physic {physical_address}'
-                        # )
-                        user_id = self.add_user(phone,name,email,physical_address)
-                        print(f'User Id = {user_id}')
-
-
-
                 self.stdout.write(
-                    self.style.SUCCESS(f'ChatGPT: {bot_response}')
+                    self.style.SUCCESS(f'AI: {bot_response}')
                     )
-                
-                customer_information_completed = False
+                log = self.add_to_logs(user_message , bot_response ,user,chat_instance)
                 chat_log.append({"role":"assistant","content":bot_response})
 
 
-        # print(chat_log)
-        self.stdout.write(self.style.SUCCESS('The chat finished successfully'))
-        # Access command-line arguments if defined
-        # argument_value = kwargs['argument_name']
-        # self.stdout.write(self.style.SUCCESS(f'Argument received: {argument_value}'))
-
+        # print(f"The Full Final Log is {chat_log}")
+        self.stdout.write(self.style.SUCCESS('The Conversation Has Ended Successfully'))
         
 
         

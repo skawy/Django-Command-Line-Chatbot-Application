@@ -45,7 +45,7 @@ while True:
             messages=chat_log
         )
         assistant_response = response.choices[0].message.content
-        print(f'ChatGPT: {assistant_response}')
+        print(f'AI: {assistant_response}')
         chat_log.append({"role":"assistant","content":assistant_response})
 
 

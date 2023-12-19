@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 # Create your models here.
 class Users(models.Model):
@@ -16,7 +17,7 @@ class Chats(models.Model):
 class Logs(models.Model):
     message = models.TextField()
     response = models.TextField()
-    log_time = models.DateField()
+    time = models.DateTimeField(default=timezone.now)
     user_id = models.ForeignKey(Users , on_delete= models.CASCADE)
     chat_id = models.ForeignKey(Chats , on_delete= models.CASCADE)
 
