@@ -82,8 +82,12 @@ class Command(BaseCommand):
         client = OpenAI()
 
         chat_log = [ 
-            {'role': 'system', 'content' : 'you are given the customers information and they are 1) phone_number 2) name 3) email and wont continue unless you get all of them and print them'}
-            ]
+            {
+                'role': 'system', 
+                'content' : 'you are given the customers information and they are 1) phone_number 2) name 3) email and wont continue unless you get all of them and print them'
+            }
+        ]
+
         print("\nHello, Can you give me your information: Phone Number , Name , Email")
         while True:
             print("\n")
@@ -124,7 +128,7 @@ class Command(BaseCommand):
             print("\n")
             user_message = input("You: ")
             print("\n")
-            # End Of The Conversation And Get The Summary
+            # If User Says Bye it will be the End Of The Conversation And Get The Summary
             if any(word in user_message.lower() for word in goodbyes):
 
                 chat_log.append( 
@@ -147,7 +151,7 @@ class Command(BaseCommand):
                 current_chat.summary = summary
                 current_chat.save()
                 break
-
+            # Else You are resuming chatting with the bot
             else:
                 chat_log.append({"role": "user","content":user_message})
 
