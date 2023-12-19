@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 class Users(models.Model):
-    phone = models.IntegerField()
+    phone = models.CharField(max_length=15)
     name = models.CharField(max_length=30)
     email = models.CharField(max_length=60)
     physical_address = models.CharField(max_length=60)
