@@ -42,14 +42,15 @@ class Command(BaseCommand):
         phone = None
         name = None
         email = None
-        physical_address = hex(uuid.getnode())
+        physical_address = None
         user = None
         customer_information_valid = False
 
-        if ("Phone Number:" and "Email:" and "Name:" in response):
+        if ("Phone Number:" and "Email:" and "Name:" and "Physical Address:"in response):
             phone = response.partition("Phone Number:")[2].split('\n')[0]
             email = response.partition("Email:")[2].split('\n')[0]
             name = response.partition("Name:")[2].split('\n')[0]
+            physical_address = response.partition("Physical Address:")[2].split('\n')[0]
             customer_information_valid = True
             
 
@@ -84,11 +85,11 @@ class Command(BaseCommand):
         chat_log = [ 
             {
                 'role': 'system', 
-                'content' : 'you are given the customers information and they are 1) phone_number 2) name 3) email and wont continue unless you get all of them and print them'
+                'content' : 'you are given the customers information and they are 1) phone_number 2) name 3) email 4)physical_address and wont continue unless you get all of them and print them'
             }
         ]
 
-        print("\nHello, Can you give me your information: Phone Number , Name , Email")
+        print("\nHello, Can you give me your information: Phone Number , Name , Email and Physical address")
         while True:
             print("\n")
             user_message = input("You: ")
