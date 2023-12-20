@@ -18,15 +18,17 @@ And Add your OPENAI_API_KEY Which you can get via https://platform.openai.com/ap
 First Clone This Repo
 ```sh
 cd django_chatbot
-python manage.py  chatbot
+python manage.py chatbot
 ```
 
 ## Overview of the files
 
 django_chatbot/chatbot/management/commands: this folder have the main scripts i developed during this project
 
-#### 1) django_chatbot/chatbot/management/commands/chatbot.py => This is the main command or the main file that contains the code and run the chatbot
-
+#### 1) django_chatbot/chatbot/management/commands/chatbot.py => This is the main command or the main file that contains the code and run the chatbot, you can run it with
+ ```sh
+python manage.py chatbot
+```
 #### 2  django_chatbot/chatbot/tests.py => It Contains all unit tests for db objects creation and you can run the tests with the command
  ```sh
 python manage.py test chatbot
