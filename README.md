@@ -24,6 +24,6 @@ python manage.py  chatbot
 ## Overview of the files
 chatbot/models.py Contain The Database tables that will be created in mysql db and these Tables Are
 
-!(models_erd.png)
-
-
+<h1 align="center">
+<img src="models_erd.png" width="400" height = "400">
+</h1>
