@@ -28,7 +28,11 @@ django_chatbot/chatbot/management/commands: this folder have the main scripts i 
 And The main command or the main file that contains the code is:
 #### 1) django_chatbot/chatbot/management/commands/chatbot.py
 
-#### 2) django_chatbot/chatbot/models.py Contain The Database tables that will be created in mysql db and these Tables Are
+#### 2  django_chatbot/chatbot/tests.py It Contains all unit tests for db objects creation and you can run the tests with the command
+ ```sh
+python manage.py test chatbot
+```
+#### 3) django_chatbot/chatbot/models.py It Contains The Database Schemas that will be created in mysql db and these Tables Are
 
 <h1 align="center">
 <img src="models_erd.png" >
