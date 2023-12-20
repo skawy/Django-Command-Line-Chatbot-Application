@@ -27,3 +27,30 @@ chatbot/models.py Contain The Database tables that will be created in mysql db a
 <h1 align="center">
 <img src="models_erd.png" >
 </h1>
+
+## Prompt Engineering
+```sh
+//Prompt To Collect The Customer Information
+chat_log = [ 
+      {
+          'role': 'system', 
+          'content' : 'you are given the customers information and they are 1) phone_number 2) name 3) email and wont continue unless you get all of them and print them'
+      }
+]
+
+//Prompt To Get The Summary of The Customer`s Complaint and the parameters
+chat_log.append( 
+    {
+      'role': 'system',
+      'content' : 'Till now you provided with the customer`s problem, your task is to Provide a brief summary of this customer`s problem'
+    }
+)
+response = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=chat_log,
+    temperature = 0.7,
+    max_tokens = 512,
+    top_p=1
+)
+
+```
