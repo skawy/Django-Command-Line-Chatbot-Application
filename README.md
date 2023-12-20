@@ -22,7 +22,13 @@ python manage.py  chatbot
 ```
 
 ## Overview of the files
-chatbot/models.py Contain The Database tables that will be created in mysql db and these Tables Are
+
+django_chatbot/chatbot/management/commands: this folder have the main scripts i developed during this project
+
+And The main command or the main file that contains the code is:
+#### django_chatbot/chatbot/management/commands/chatbot.py
+
+#### django_chatbot/chatbot/models.py Contain The Database tables that will be created in mysql db and these Tables Are
 
 <h1 align="center">
 <img src="models_erd.png" >
