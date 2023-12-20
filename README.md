@@ -30,7 +30,7 @@ chatbot/models.py Contain The Database tables that will be created in mysql db a
 
 ## Prompt Engineering
 ```sh
-//Prompt To Collect The Customer Information
+# Prompt To Collect The Customer Information
 chat_log = [ 
       {
           'role': 'system', 
@@ -38,7 +38,7 @@ chat_log = [
       }
 ]
 
-//Prompt To Get The Summary of The Customer`s Complaint and the parameters
+# Prompt To Get The Summary of The Customer`s Complaint and the parameters
 chat_log.append( 
     {
       'role': 'system',
