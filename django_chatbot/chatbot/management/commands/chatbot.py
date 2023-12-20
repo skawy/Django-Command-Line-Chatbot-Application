@@ -55,7 +55,6 @@ class Command(BaseCommand):
             
 
             if not self.validate_phone_number(phone):
-                print("")
                 customer_information_valid = False
                 print(f"phone is Invalid: {phone}")
 
