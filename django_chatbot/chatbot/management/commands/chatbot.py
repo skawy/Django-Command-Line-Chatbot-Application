@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from chatbot.models import Users,Chats,Logs
-import os ,re , uuid
+import os ,re 
 from openai import OpenAI
 from dotenv import load_dotenv
 
